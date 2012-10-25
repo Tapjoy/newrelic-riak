@@ -22,10 +22,61 @@ DependencyDetection.defer do
       add_method_tracer :mapred, 'Database/Riak/mapred'
 
       add_method_tracer :list_keys, 'Database/Riak/list_keys'
-      add_method_tracer :fetch_object, 'Database/Riak/fetch_object'
       add_method_tracer :reload_object, 'Database/Riak/reload_object'
-      add_method_tracer :store_object, 'Database/Riak/store_object'
       add_method_tracer :delete_object, 'Database/Riak/delete_object'
+    end
+
+    ::Riak::Client.class_eval do
+
+      def store_object_with_newrelic_trace(*args, &blk)
+        if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
+          total_metric = 'Database/Riak/allWeb'
+        else
+          total_metric = 'Database/Riak/allOther'
+        end
+
+        robject = args[0].is_a?(Array) ? args[0][0] : args[0]
+        bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
+        metrics = ["Database/Riak/#{bucket}#store", total_metric]
+
+        self.class.trace_execution_scoped(metrics) do
+          start = Time.now
+
+          begin
+            store_object_without_newrelic_trace(*args, &blk)
+          ensure
+            s = NewRelic::Agent.instance.transaction_sampler
+            s.notice_nosql(args.inspect, (Time.now - start).to_f) rescue nil
+          end
+        end
+      end
+
+      def get_object_with_newrelic_trace(*args, &blk)
+        if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
+          total_metric = 'Database/Riak/allWeb'
+        else
+          total_metric = 'Database/Riak/allOther'
+        end
+
+        bucket = args[0].is_a?(Array) ? args[0][0] : args[0]
+        metrics = ["Database/Riak/#{bucket.to_s}#get", total_metric]
+
+        self.class.trace_execution_scoped(metrics) do
+          start = Time.now
+
+          begin
+            get_object_without_newrelic_trace(*args, &blk)
+          ensure
+            s = NewRelic::Agent.instance.transaction_sampler
+            s.notice_nosql(args.inspect, (Time.now - start).to_f) rescue nil
+          end
+        end
+      end
+
+      alias_method :store_object_without_newrelic_trace, :store_object
+      alias_method :store_object, :store_object_with_newrelic_trace
+      alias_method :get_object_without_newrelic_trace, :get_object
+      alias_method :get_object, :get_object_with_newrelic_trace
     end
 
     ::Riak::Client::BeefcakeProtobuffsBackend.class_eval &backend_tracers
