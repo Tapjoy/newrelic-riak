@@ -59,7 +59,8 @@ DependencyDetection.defer do
         end
 
         bucket = args[0].is_a?(Array) ? args[0][0] : args[0]
-        metrics = ["Database/Riak/#{bucket.to_s}#get", total_metric]
+        bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
+        metrics = ["Database/Riak/#{bucket}#get", total_metric]
 
         self.class.trace_execution_scoped(metrics) do
           start = Time.now
