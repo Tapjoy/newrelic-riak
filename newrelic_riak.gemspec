@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name = "newrelic_riak"
-  gem.version = "0.1.0"
+  gem.version = "0.1.1"
   gem.authors = ["Alin Popa"]
   gem.date = "2012-04-23"
   gem.description = "NewRelic instrumentation for Riak."
