@@ -30,14 +30,15 @@ DependencyDetection.defer do
 
       def store_object_with_newrelic_trace(*args, &blk)
         if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
-          total_metric = 'Database/Riak/allWeb'
+          total_metric = 'ActiveRecord/allWeb'
         else
-          total_metric = 'Database/Riak/allOther'
+          total_metric = 'ActiveRecord/allOther'
         end
 
         robject = args[0].is_a?(Array) ? args[0][0] : args[0]
         bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
-        metrics = ["Database/Riak/#{bucket}#store", total_metric]
+        bucket = self.newrelic_riak_camelize(bucket)
+        metrics = ["ActiveRecord/#{bucket}/save", total_metric, 'ActiveRecord/#{bucket}', 'ActiveRecord/save', 'ActiveRecord/all']
 
         self.class.trace_execution_scoped(metrics) do
           start = Time.now
@@ -53,14 +54,15 @@ DependencyDetection.defer do
 
       def get_object_with_newrelic_trace(*args, &blk)
         if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
-          total_metric = 'Database/Riak/allWeb'
+          total_metric = 'ActiveRecord/allWeb'
         else
-          total_metric = 'Database/Riak/allOther'
+          total_metric = 'ActiveRecord/allOther'
         end
 
         bucket = args[0].is_a?(Array) ? args[0][0] : args[0]
         bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
-        metrics = ["Database/Riak/#{bucket}#get", total_metric]
+        bucket = self.newrelic_riak_camelize(bucket)
+        metrics = ["ActiveRecord/#{bucket}/find", total_metric, 'ActiveRecord/#{bucket}', 'ActiveRecord/find', 'ActiveRecord/all']
 
         self.class.trace_execution_scoped(metrics) do
           start = Time.now
@@ -78,6 +80,12 @@ DependencyDetection.defer do
       alias_method :store_object, :store_object_with_newrelic_trace
       alias_method :get_object_without_newrelic_trace, :get_object
       alias_method :get_object, :get_object_with_newrelic_trace
+
+      # turn bucket-name-for-things_that_ar-ok into BucketNameForThingsThatArOk
+      def newrelic_riak_camelize(term)
+        string = term.to_s.capitalize
+        string.gsub(/[_-]([a-z]*)/) { "#{$1.capitalize}" }
+      end
     end
 
     ::Riak::Client::BeefcakeProtobuffsBackend.class_eval &backend_tracers
