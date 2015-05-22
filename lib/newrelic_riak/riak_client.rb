@@ -93,6 +93,7 @@ DependencyDetection.defer do
       add_method_tracer :server_info, 'Database/Riak/server_info'
       add_method_tracer :get_client_id, 'Database/Riak/get_client_id'
       add_method_tracer :set_client_id, 'Database/Riak/set_client_id'
+      add_method_tracer :get_index, 'Database/Riak/get_index'
     end
     ::Riak::Client::HTTPBackend.class_eval &backend_tracers
     ::Riak::Client::HTTPBackend.class_eval do
