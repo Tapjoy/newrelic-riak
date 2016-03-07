@@ -70,6 +70,7 @@ DependencyDetection.defer do
             store_object_without_newrelic_trace(*args, &blk)
           rescue => e
             # NOOP apparently?
+            nil
           end
         end
       end
@@ -89,6 +90,7 @@ DependencyDetection.defer do
             get_object_without_newrelic_trace(*args, &blk)
           rescue => e
             # NOOP apparently?
+            nil
           end
         end
       end
