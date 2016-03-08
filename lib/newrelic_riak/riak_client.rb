@@ -36,14 +36,14 @@ DependencyDetection.defer do
     # Instrument measuring the store_object Callbacks
 
     # Instrument the ProtobuffsBackend
-    backend_tracers ::Riak::Client::BeefcakeProtobuffsBackend
+    backend_tracers.call(::Riak::Client::BeefcakeProtobuffsBackend)
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :server_info
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :set_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_index
 
     # Instrument the HTTPBackend
-    backend_tracers ::Riak::Client::HTTPBackend
+    backend_tracers.call(Riak::Client::HTTPBackend)
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :stats
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :link_walk
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :get_index
