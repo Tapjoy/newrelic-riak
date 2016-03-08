@@ -14,21 +14,6 @@ DependencyDetection.defer do
 
   executes do
 
-    # Make this bad boy re-usable
-    backend_tracers = Proc.new do |klass|
-      NewRelic::Agent::Datastores.trace klass, :ping
-
-      NewRelic::Agent::Datastores.trace klass, :list_buckets
-      NewRelic::Agent::Datastores.trace klass, :get_bucket_props
-      NewRelic::Agent::Datastores.trace klass, :set_bucket_props
-
-      NewRelic::Agent::Datastores.trace klass, :mapred
-
-      NewRelic::Agent::Datastores.trace klass, :list_keys
-      NewRelic::Agent::Datastores.trace klass, :reload_object
-      NewRelic::Agent::Datastores.trace klass, :delete_object
-    end
-
     get_set_callback = Proc.new do |result, scoped_metric, elapsed|
       NewRelic::Agent::Datastores.notice_statement(query, scoped_metric, elapsed)
     end
@@ -36,14 +21,36 @@ DependencyDetection.defer do
     # Instrument measuring the store_object Callbacks
 
     # Instrument the ProtobuffsBackend
-    backend_tracers.call(::Riak::Client::BeefcakeProtobuffsBackend)
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :ping
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :list_buckets
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_bucket_props
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :set_bucket_props
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :mapred
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :list_keys
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :reload_object
+    NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :delete_object
+
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :server_info
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :set_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_index
 
     # Instrument the HTTPBackend
-    backend_tracers.call(Riak::Client::HTTPBackend)
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :ping
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :list_buckets
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :get_bucket_props
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :set_bucket_props
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :mapred
+
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :list_keys
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :reload_object
+    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :delete_object
+
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :stats
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :link_walk
     NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :get_index
