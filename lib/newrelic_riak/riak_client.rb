@@ -10,14 +10,16 @@ DependencyDetection.defer do
   end
 
   executes do
-
+    NewRelic::Agent.logger.debug "POOP - Beginning"
     get_set_callback = Proc.new do |result, scoped_metric, elapsed|
+      NewRelic::Agent.logger.debug "POOP - GSC"
       NewRelic::Agent::Datastores.notice_statement(query, scoped_metric, elapsed)
     end
 
     # Instrument measuring the store_object Callbacks
 
     # Instrument the ProtobuffsBackend
+    NewRelic::Agent.logger.debug "POOP - BeefcakeProtobuffsBackend"
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :ping
 
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :list_buckets
@@ -36,10 +38,11 @@ DependencyDetection.defer do
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_index
 
     # Instrument RObject
+    NewRelic::Agent.logger.debug "POOP - RObject"
     NewRelic::Agent::Datastores.trace ::Riak::RObject, :serialize
 
     ::Riak::Client.class_eval do
-
+    NewRelic::Agent.logger.debug "POOP - Client class_eval"
       def store_object_with_newrelic_trace(*args, &blk)
         total_metric = 'ActiveRecord/allOther'
         if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
@@ -79,7 +82,7 @@ DependencyDetection.defer do
           end
         end
       end
-
+      NewRelic::Agent.logger.debug "POOP - ALIASING"
       alias_method :store_object_without_newrelic_trace, :store_object
       alias_method :store_object, :store_object_with_newrelic_trace
       alias_method :get_object_without_newrelic_trace, :get_object
