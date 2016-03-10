@@ -1,6 +1,3 @@
-require 'new_relic/agent/method_tracer'
-
-
 DependencyDetection.defer do
   @name = :riak_client
 
@@ -37,25 +34,6 @@ DependencyDetection.defer do
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :set_client_id
     NewRelic::Agent::Datastores.trace ::Riak::Client::BeefcakeProtobuffsBackend, :get_index
-
-    # Instrument the HTTPBackend
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :ping
-
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :list_buckets
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :get_bucket_props
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :set_bucket_props
-
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :mapred
-
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :list_keys
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :reload_object
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :delete_object
-
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :stats
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :link_walk
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :get_index
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :search
-    NewRelic::Agent::Datastores.trace ::Riak::Client::HTTPBackend, :update_search_index
 
     # Instrument RObject
     NewRelic::Agent::Datastores.trace ::Riak::RObject, :serialize
