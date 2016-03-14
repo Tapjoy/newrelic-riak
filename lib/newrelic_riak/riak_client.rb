@@ -50,7 +50,8 @@ module NewRelic
       module Riak
         def get_set_callback
           Proc.new do |result, scoped_metric, elapsed|
-            NewRelic::Agent::Datastores.notice_statement(statement, elapsed)
+            # See datastores.rb in newrelic_rpm gem for context
+            NewRelic::Agent::Datastores.notice_statement(result, elapsed)
           end
         end
 
