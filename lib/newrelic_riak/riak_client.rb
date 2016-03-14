@@ -63,7 +63,7 @@ module NewRelic
         def store_object_with_newrelic_trace(*args, &blk)
           robject = args[0].is_a?(Array) ? args[0][0] : args[0]
           bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
-          bucket = self.newrelic_riak_camelize(bucket)
+          bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback) do
             begin
@@ -78,7 +78,7 @@ module NewRelic
         def get_object_with_newrelic_trace(*args, &blk)
           bucket = args[0].is_a?(Array) ? args[0][0] : args[0]
           bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
-          bucket = self.newrelic_riak_camelize(bucket)
+          bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback) do
             begin
