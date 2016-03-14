@@ -32,10 +32,6 @@ DependencyDetection.defer do
     NewRelic::Agent.logger.info 'Riak: RObject'
     backend_tracers.call(::Riak::RObject, ['serialize'])
 
-    @get_set_callback = Proc.new do |result, scoped_metric, elapsed|
-      NewRelic::Agent::Datastores.notice_statement(query, scoped_metric, elapsed)
-    end
-
     # Instrument Riak client get/store
     NewRelic::Agent.logger.info 'Riak: Wrap Riak::Client save/find with NR and alias them'
     ::Riak::Client.class_eval do
@@ -52,6 +48,12 @@ module NewRelic
   module Agent
     module Instrumentation
       module Riak
+        def get_set_callback
+          Proc.new do |result, scoped_metric, elapsed|
+            NewRelic::Agent::Datastores.notice_statement(statement, elapsed)
+          end
+        end
+
         # turn bucket-name-for-things_that_ar-ok into BucketNameForThingsThatArOk
         def newrelic_riak_camelize(term)
           string = term.to_s.capitalize
@@ -63,7 +65,7 @@ module NewRelic
           bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
           bucket = self.newrelic_riak_camelize(bucket)
 
-          NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, @get_set_callback) do
+          NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback) do
             begin
               store_object_without_newrelic_trace(*args, &blk)
             rescue => e
@@ -78,7 +80,7 @@ module NewRelic
           bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
           bucket = self.newrelic_riak_camelize(bucket)
 
-          NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, @get_set_callback) do
+          NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback) do
             begin
               get_object_without_newrelic_trace(*args, &blk)
             rescue => e
