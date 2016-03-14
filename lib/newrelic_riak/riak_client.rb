@@ -15,8 +15,10 @@ DependencyDetection.defer do
     # Make this bad boy re-usable
     NewRelic::Agent.logger.info 'Riak: backend_tracers'
     backend_tracers = Proc.new do |klass, klass_methods, product = 'Riak'|
-      klass_methods.each do |entry|
-        NewRelic::Agent::Datastores.trace klass, entry, product
+      klass.class_eval do
+        klass_methods.each do |entry|
+          NewRelic::Agent::Datastores.trace self, entry, product
+        end
       end
     end
 
