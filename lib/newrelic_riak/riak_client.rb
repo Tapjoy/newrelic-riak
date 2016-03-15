@@ -48,7 +48,11 @@ module NewRelic
         def get_set_callback
           Proc.new do |result, scoped_metric, elapsed|
             # See datastores.rb in newrelic_rpm gem for context
-            result = result.respond_to?(:key) || result.respond_to?(:keys) ? result.key || result.keys.join(',') : result
+            if result.respond_to?(:key)
+              result = result.key
+            elsif result.respond_to?(:data)
+              result = result.data
+            end
             NewRelic::Agent::Datastores.notice_statement(result, elapsed)
           end
         end
