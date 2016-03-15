@@ -1,3 +1,4 @@
+require 'new_relic/agent/method_tracer'
 require 'new_relic/agent/datastores'
 
 DependencyDetection.defer do
@@ -32,10 +33,10 @@ DependencyDetection.defer do
     NewRelic::Agent.logger.info 'Riak: Wrap Riak::Client save/find with NR and alias them'
     ::Riak::Client.class_eval do
       include NewRelic::Agent::Instrumentation::Riak
-      alias_method :store_object_without_newrelic_trace, :store_object
-      alias_method :store_object, :store_object_with_newrelic_trace
-      alias_method :get_object_without_newrelic_trace, :get_object
-      alias_method :get_object, :get_object_with_newrelic_trace
+      alias_method :store_object_without_newrelic, :store_object
+      alias_method :store_object, :store_object_with_newrelic
+      alias_method :get_object_without_newrelic, :get_object
+      alias_method :get_object, :get_object_with_newrelic
     end
   end
 end
@@ -47,6 +48,7 @@ module NewRelic
         def get_set_callback
           Proc.new do |result, scoped_metric, elapsed|
             # See datastores.rb in newrelic_rpm gem for context
+            result = result.respond_to?(:key) || result.respond_to?(:keys) ? result.key || result.keys.join(',') : result
             NewRelic::Agent::Datastores.notice_statement(result, elapsed)
           end
         end
@@ -57,14 +59,14 @@ module NewRelic
           string.gsub(/[_-]([a-z]*)/) { "#{$1.capitalize}" }
         end
 
-        def store_object_with_newrelic_trace(*args, &blk)
+        def store_object_with_newrelic(*args, &blk)
           robject = args[0].is_a?(Array) ? args[0][0] : args[0]
           bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
           bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback) do
             begin
-              store_object_without_newrelic_trace(*args, &blk)
+              store_object_without_newrelic(*args, &blk)
             rescue => e
               # NOOP apparently?
               nil
@@ -72,14 +74,14 @@ module NewRelic
           end
         end
 
-        def get_object_with_newrelic_trace(*args, &blk)
+        def get_object_with_newrelic(*args, &blk)
           bucket = args[0].is_a?(Array) ? args[0][0] : args[0]
           bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
           bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback) do
             begin
-              get_object_without_newrelic_trace(*args, &blk)
+              get_object_without_newrelic(*args, &blk)
             rescue => e
               # NOOP apparently?
               nil
