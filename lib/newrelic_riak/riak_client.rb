@@ -12,25 +12,21 @@ DependencyDetection.defer do
   end
 
   executes do
-    # Make this bad boy re-usable
-    NewRelic::Agent.logger.info 'Riak: backend_tracers'
-    backend_tracers = Proc.new do |klass, klass_methods, product = 'Riak'|
-      klass.class_eval do
-        klass_methods.each do |entry|
-          NewRelic::Agent::Datastores.trace self, entry, product
-        end
-      end
-    end
-
     # Instrument the ProtoBuffsBackend
     NewRelic::Agent.logger.info 'Riak: BeefcakeProtoBuffsBackend'
-    method_list = %w(ping list_buckets get_bucket_props set_bucket_props mapred list_keys
-                     reload_object delete_object server_info get_client_id set_client_id get_index)
-    backend_tracers.call(::Riak::Client::BeefcakeProtobuffsBackend, method_list)
+    ::Riak::Client::BeefcakeProtobuffsBackend.class_eval do
+      method_list = %w(ping list_buckets get_bucket_props set_bucket_props mapred list_keys
+                       reload_object delete_object server_info get_client_id set_client_id get_index)
+      method_list.each do |method_name|
+        NewRelic::Agent::Datastores.trace self, entry, 'Riak'
+      end
+    end
     
     # Instrument RObject
     NewRelic::Agent.logger.info 'Riak: RObject'
-    backend_tracers.call(::Riak::RObject, ['serialize'])
+    ::Riak::RObject.class_eval do
+      NewRelic::Agent::Datastores.trace self, 'serialize', 'Riak'
+    end
 
     # Instrument Riak client get/store
     NewRelic::Agent.logger.info 'Riak: Wrap Riak::Client save/find with NR and alias them'
