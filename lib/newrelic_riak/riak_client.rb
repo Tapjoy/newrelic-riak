@@ -18,7 +18,7 @@ DependencyDetection.defer do
       method_list = %w(ping list_buckets get_bucket_props set_bucket_props mapred list_keys
                        reload_object delete_object server_info get_client_id set_client_id get_index)
       method_list.each do |method_name|
-        NewRelic::Agent::Datastores.trace self, entry, 'Riak'
+        NewRelic::Agent::Datastores.trace self, method_name, 'Riak'
       end
     end
     
