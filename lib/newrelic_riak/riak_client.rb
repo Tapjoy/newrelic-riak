@@ -69,12 +69,7 @@ module NewRelic
           bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback) do
-            begin
-              store_object_without_newrelic(*args, &blk)
-            rescue => e
-              # NOOP apparently?
-              nil
-            end
+            store_object_without_newrelic(*args, &blk)
           end
         end
 
@@ -84,12 +79,7 @@ module NewRelic
           bucket = newrelic_riak_camelize(bucket)
 
           NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback) do
-            begin
-              get_object_without_newrelic(*args, &blk)
-            rescue => e
-              # NOOP apparently?
-              nil
-            end
+            get_object_without_newrelic(*args, &blk)
           end
         end
       end
