@@ -45,15 +45,9 @@ module NewRelic
   module Agent
     module Instrumentation
       module Riak
-        def get_set_callback
+        def get_set_callback(statement)
           Proc.new do |result, scoped_metric, elapsed|
-            # See datastores.rb in newrelic_rpm gem for context
-            if result.respond_to?(:key)
-              result = result.key
-            elsif result.respond_to?(:data)
-              result = result.data
-            end
-            NewRelic::Agent::Datastores.notice_statement(result, elapsed)
+            NewRelic::Agent::Datastores.notice_statement(statement, elapsed)
           end
         end
 
@@ -68,7 +62,7 @@ module NewRelic
           bucket = robject.respond_to?(:bucket) && robject.bucket ? robject.bucket.name : ''
           bucket = newrelic_riak_camelize(bucket)
 
-          NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback) do
+          NewRelic::Agent::Datastores.wrap('Riak', 'save', bucket, get_set_callback(args.inspect)) do
             store_object_without_newrelic(*args, &blk)
           end
         end
@@ -78,7 +72,7 @@ module NewRelic
           bucket = bucket && bucket.respond_to?(:name) ? bucket.name : bucket.to_s
           bucket = newrelic_riak_camelize(bucket)
 
-          NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback) do
+          NewRelic::Agent::Datastores.wrap('Riak', 'find', bucket, get_set_callback(args.inspect)) do
             get_object_without_newrelic(*args, &blk)
           end
         end
