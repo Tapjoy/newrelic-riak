@@ -29,7 +29,7 @@ DependencyDetection.defer do
     ::Riak::Client.class_eval do
 
       def store_object_with_newrelic_trace(*args, &blk)
-        if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
+        if NewRelic::Agent::Transaction.recording_web_transaction?
           total_metric = 'ActiveRecord/allWeb'
         else
           total_metric = 'ActiveRecord/allOther'
@@ -53,7 +53,7 @@ DependencyDetection.defer do
       end
 
       def get_object_with_newrelic_trace(*args, &blk)
-        if NewRelic::Agent::Instrumentation::MetricFrame.recording_web_transaction?
+        if NewRelic::Agent::Transaction.recording_web_transaction?
           total_metric = 'ActiveRecord/allWeb'
         else
           total_metric = 'ActiveRecord/allOther'
