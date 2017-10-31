@@ -1,25 +1,26 @@
 ## Description
 
-NewRelic instrumentation for [riak-ruby-client](https://github.com/basho/riak-ruby-client) and [ripple](https://github.com/seancribbs/ripple).
+NewRelic instrumentation for [riak-ruby-client](https://github.com/basho/riak-ruby-client).
 
 ## Dependencies
 `newrelic-riak` requires:
-- Ruby 1.9.3 or later (1.9.3 was the only version that was tested against)
+- Ruby 1.9.3 or later
 - [newrelic](https://github.com/newrelic/rpm)
 - [riak-ruby-client](https://github.com/basho/riak-ruby-client)
-- [ripple](https://github.com/seancribbs/ripple)
 
 ## Installation
 
 Add the gem file reference to the Gemfile:
 
-``` ruby
-gem 'newrelic_riak', '~> 0.1.0', git: 'git://github.com/alinpopa/newrelic-riak.git', ref: '7b0bcaadfd5d10daa74825249f484c85f3be488c'
+```ruby
+gem 'newrelic_riak', '~> 0.2.0'
 ```
+
+As of this writing, this will need to be done with a URL to Gemfury private gem hosting.
 
 ## Usage
 Just require the gem where you need it:
-``` ruby
+```ruby
 require 'newrelic_riak'
 ```
 
